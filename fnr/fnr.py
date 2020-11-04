@@ -2,7 +2,7 @@
 Author: zhanghao.chen
 Date: 2020-09-18 10:53:32
 LastEditors: Please set LastEditors
-LastEditTime: 2020-10-15 11:26:50
+LastEditTime: 2020-11-03 17:09:41
 Description: file content
 '''
 
@@ -15,7 +15,7 @@ import logging
 def replace_gen(common_str, rep, config, module_name):
     module = importlib.import_module(module_name)
 
-    g = re.search(r'^(\w*)\((.*)\)$', rep)
+    g = re.search(r'^(\w*)\(([\s\S]*)\)$', rep)
     if g == None:
         logging.error('rep[{}] is illgal'.format(rep))
         assert (None)
@@ -51,27 +51,22 @@ def replace_gen(common_str, rep, config, module_name):
 
 def replace(common_str, config, module_name):
     while True:
-        res = re.findall(r'\[\[\[(\w.*?\))\]\]\]', common_str)
+        offset = common_str.rfind('[[[')
+        if offset == -1:
+            return common_str
+        res = re.findall(r'\[\[\[([\s\S]*?)\]\]\]', common_str[offset:])
         if len(res) <= 0:
-            offset = common_str.find('[[[')
-            if offset > 0:
-                logging.error(common_str[offset - 20:offset + 20])
-                logging.error('code str still have [[[ or ]]]')
-                assert (None)
-
-            offset = common_str.find(']]]')
-            if offset > 0:
-                logging.error(common_str[offset - 20:offset + 20])
-                logging.error('code str still have [[[ or ]]]')
-                assert (None)
-
+            logging.error(common_str[offset - 20:offset + 20])
+            logging.error('code str still have [[[ or ]]]')
+            assert (None)
             return common_str
 
         for rep in res:
             if rep.find('[[[') > 0 or rep.find('[[[') > 0:
-                continue
+                logging.error('rep[{}] is not regular'.format(rep))
+                assert (None)
             logging.debug('handle rep[{}]'.format(rep))
-            g = re.search(r'^(\w*)\((.*)\)$', rep)
+            g = re.search(r'^(\w*)\(([\s\S]*)\)$', rep)
             if g == None:
                 logging.error('rep[{}] is not regular'.format(rep))
                 assert (None)
@@ -97,6 +92,3 @@ def replace(common_str, config, module_name):
 
             logging.error('rep[{}] is not be defined'.format(rep))
             assert (None)
-
-
-# def replace_conf(config, module_name):
