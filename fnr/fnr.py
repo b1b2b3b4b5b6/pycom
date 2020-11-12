@@ -2,7 +2,7 @@
 Author: zhanghao.chen
 Date: 2020-09-18 10:53:32
 LastEditors: Please set LastEditors
-LastEditTime: 2020-11-03 17:09:41
+LastEditTime: 2020-11-10 09:06:06
 Description: file content
 '''
 
@@ -42,6 +42,10 @@ def replace_gen(common_str, rep, config, module_name):
 
     if arg_count == 3:
         gen_str = func(config, arg_list[0], arg_list[1], arg_list[2])
+
+    if arg_count == 4:
+        gen_str = func(config, arg_list[0],
+                       arg_list[1], arg_list[2], arg_list[3])
 
     logging.debug('gen_str[{}]'.format(gen_str))
     common_str = common_str.replace(
