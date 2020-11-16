@@ -1,8 +1,8 @@
 '''
 Author: zhanghao.chen
 Date: 2020-09-18 10:53:32
-LastEditors: Please set LastEditors
-LastEditTime: 2020-11-10 09:06:06
+LastEditors: zhanghao.chen
+LastEditTime: 2020-11-16 14:27:10
 Description: file content
 '''
 
@@ -46,8 +46,19 @@ def replace_gen(common_str, rep, config, module_name):
     if arg_count == 4:
         gen_str = func(config, arg_list[0],
                        arg_list[1], arg_list[2], arg_list[3])
+    if arg_count == 5:
+        gen_str = func(config, arg_list[0],
+                       arg_list[1], arg_list[2], arg_list[3], arg_list[4])
+    if arg_count == 6:
+        gen_str = func(config, arg_list[0],
+                       arg_list[1], arg_list[2], arg_list[3], arg_list[4], arg_list[5])
+    if arg_count == 7:
+        gen_str = func(config, arg_list[0],
+                       arg_list[1], arg_list[2], arg_list[3], arg_list[4], arg_list[5], arg_list[6])
+    if arg_count == 8:
+        gen_str = func(config, arg_list[0],
+                       arg_list[1], arg_list[2], arg_list[3], arg_list[4], arg_list[5], arg_list[6], arg_list[7])
 
-    logging.debug('gen_str[{}]'.format(gen_str))
     common_str = common_str.replace(
         '[[[{}]]]'.format(rep), gen_str)
     return common_str

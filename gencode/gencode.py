@@ -2,7 +2,7 @@
 @Author: zhanghao.chen
 @Date: 2020-08-03 13:21:46
 LastEditors: zhanghao.chen
-LastEditTime: 2020-09-23 10:52:57
+LastEditTime: 2020-11-16 14:20:14
 @Description: file content
 '''
 
@@ -39,7 +39,6 @@ def get_format_str(type_name):
 def member_format(member_dict, prefix='default_prefix.'):
     format_list = []
     arg_list = []
-    print(member_dict)
     for val in member_dict.values():
         name = val.name
         type_name = val.type_name.type
