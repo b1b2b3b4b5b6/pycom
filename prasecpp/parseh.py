@@ -2,7 +2,7 @@
 @Author: zhanghao.chen
 @Date: 2020-07-29 14:06:25
 LastEditors: zhanghao.chen
-LastEditTime: 2020-08-20 16:23:49
+LastEditTime: 2020-11-24 15:29:20
 @Description: file content
 '''
 
@@ -54,14 +54,16 @@ def parse_file(file_name, encoding_str):
     code_str = tool.clean_comment(code_str)
     #code_str = tool.replace_define(code_str)
 
-    fp = open('temp.cpp', 'w+', encoding='gb2312')
+    fp = open('__temp__.cpp', 'w+', encoding='gb2312')
     fp.write(code_str)
     fp.close()
-    tool.format_file('temp.cpp')
+    tool.format_file('__temp__.cpp')
 
-    fp = open('temp.cpp', 'r', encoding='gb2312')
+    fp = open('__temp__.cpp', 'r', encoding='gb2312')
     code_str = fp.read()
     fp.close()
+
+    os.remove('__temp__.cpp')
 
     typedef_struct_dict = get_typedef_struct(code_str)
     struct = get_struct(code_str)

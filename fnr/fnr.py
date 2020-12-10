@@ -1,8 +1,8 @@
 '''
 Author: zhanghao.chen
 Date: 2020-09-18 10:53:32
-LastEditors: zhanghao.chen
-LastEditTime: 2020-11-16 14:27:10
+LastEditors: Please set LastEditors
+LastEditTime: 2020-11-25 14:33:58
 Description: file content
 '''
 
@@ -12,8 +12,22 @@ import importlib
 import logging
 
 
-def replace_gen(common_str, rep, config, module_name):
+def get_gen_func(gen_name, module_name):
     module = importlib.import_module(module_name)
+    func = getattr(module, gen_name, '')
+    if '' != func:
+        return func
+
+    module = importlib.import_module('common.gencode.com')
+    func = getattr(module, gen_name, '')
+    if '' != func:
+        return func
+
+    logging.error('gen_name[{}] is not define!'.format(gen_name))
+    assert(None)
+
+
+def replace_gen(common_str, rep, config, module_name):
 
     g = re.search(r'^(\w*)\(([\s\S]*)\)$', rep)
     if g == None:
@@ -28,7 +42,8 @@ def replace_gen(common_str, rep, config, module_name):
     arg_count = len(arg_list)
     logging.debug('{} < [{}][{}]'.format(
         gen_name, '$'.join(arg_list), arg_count))
-    func = getattr(module, gen_name)
+
+    func = get_gen_func(gen_name, module_name)
 
     gen_str = ''
     if arg_count == 0:
