@@ -1,8 +1,8 @@
 '''
 @Author: zhanghao.chen
 @Date: 2020-07-29 14:06:25
-LastEditors: zhanghao.chen
-LastEditTime: 2020-11-24 15:29:20
+LastEditors: Please set LastEditors
+LastEditTime: 2020-12-21 16:05:16
 @Description: file content
 '''
 
@@ -47,12 +47,12 @@ def get_struct(str_in):
     return struct_dict
 
 
-def parse_file(file_name, encoding_str):
+def parse_file(file_name, encoding_str, is_clean_comment=True):
     fp = open(file_name, encoding=encoding_str)
     code_str = fp.read()
     fp.close()
-    code_str = tool.clean_comment(code_str)
-    #code_str = tool.replace_define(code_str)
+    if True == is_clean_comment:
+        code_str = tool.clean_comment(code_str)
 
     fp = open('__temp__.cpp', 'w+', encoding='gb2312')
     fp.write(code_str)

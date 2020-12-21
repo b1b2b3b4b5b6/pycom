@@ -2,7 +2,7 @@
 Author: zhanghao.chen
 Date: 2020-09-18 10:53:32
 LastEditors: Please set LastEditors
-LastEditTime: 2020-11-25 14:33:58
+LastEditTime: 2020-12-21 15:34:27
 Description: file content
 '''
 
@@ -10,6 +10,7 @@ import os
 import re
 import importlib
 import logging
+from types import FunctionType
 
 
 def get_gen_func(gen_name, module_name):
@@ -79,6 +80,13 @@ def replace_gen(common_str, rep, config, module_name):
     return common_str
 
 
+def exec_func(code):
+    foo_code = compile(code, "<string>", "exec")
+    foo_func = FunctionType(foo_code.co_consts[0], globals(), "foo")
+
+    return foo_func()
+
+
 def replace(common_str, config, module_name):
     while True:
         offset = common_str.rfind('[[[')
@@ -118,6 +126,10 @@ def replace(common_str, config, module_name):
             elif rep_name == 'field':
                 common_str = common_str.replace(
                     '[[[{}]]]'.format(rep), config['config']['field'][rep_arg])
+                break
+            elif rep_name == 'exec':
+                common_str = common_str.replace(
+                    '[[[{}]]]'.format(rep), exec_func(rep_arg))
                 break
 
             logging.error('rep[{}] is not be defined'.format(rep))
