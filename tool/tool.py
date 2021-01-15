@@ -2,7 +2,7 @@
 @Author: zhanghao.chen
 @Date: 2020-08-01 16:23:15
 LastEditors: Please set LastEditors
-LastEditTime: 2020-10-21 15:16:24
+LastEditTime: 2021-01-15 10:19:05
 @Description: file content
 '''
 import re
@@ -11,6 +11,8 @@ import logging
 import platform
 import glob
 import shutil
+import csv
+
 
 def trim(str):
     str, _ = re.subn(r"^\s*", "", str)
@@ -67,8 +69,25 @@ def format_file(file_path):
     else:
         logging.error('unknow system[{}]'.sys_str)
         exit(-1)
-        
+
+
 def glob_copy(src_rep, dst):
     file_list = glob.glob(src_rep)
     for file_name in file_list:
         shutil.copy(file_name, dst)
+
+
+def list2csv(in_list, file_name, header=None):
+
+    if header != None and len(in_list) > 0 and len(in_list[0]) != len(header):
+        logging.error(
+            'header[{}] is illgle, first line is [{}]'.format(header, in_list[0]))
+        return
+
+    fp = open(file_name, '+w', encoding='utf-8', newline='')
+    writer = csv.writer(fp)
+
+    if header != None:
+        writer.writerow(header)
+    writer.writerows(in_list)
+    fp.close()
