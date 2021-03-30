@@ -2,7 +2,7 @@
 @Author: zhanghao.chen
 @Date: 2020-07-29 14:06:25
 LastEditors: Please set LastEditors
-LastEditTime: 2020-12-21 16:05:16
+LastEditTime: 2021-03-30 14:12:59
 @Description: file content
 '''
 
@@ -19,9 +19,9 @@ import common.prasecpp.base as base
 
 
 class Declares:
-    def __init__(self, typedef_struct={}, struct={}):
-        self.typedef_struct = typedef_struct
-        self.struct = struct
+    def __init__(self, typedef_stdict={}, stdict={}):
+        self.typedef_stdict = typedef_stdict
+        self.stdict = stdict
 
 
 def get_typedef_struct(str_in):
@@ -39,7 +39,8 @@ def get_typedef_struct(str_in):
 
 def get_struct(str_in):
     struct_dict = {}
-    res = re.findall(r'(?<!typedef )struct[\s\S]*?\{\n[\s\S]*?\}.*;', str_in)
+    res = re.findall(
+        r'(?<!\S)(?<!typedef )struct[\s\S]*?\{\n[\s\S]*?\}.*;', str_in)
     for val in res:
         s = base.Struct(val)
         struct_dict[s.name] = s
@@ -65,6 +66,6 @@ def parse_file(file_name, encoding_str, is_clean_comment=True):
 
     os.remove('__temp__.cpp')
 
-    typedef_struct_dict = get_typedef_struct(code_str)
-    struct = get_struct(code_str)
-    return Declares(typedef_struct=typedef_struct_dict, struct=struct)
+    typedef_stdict = get_typedef_struct(code_str)
+    stdict = get_struct(code_str)
+    return Declares(typedef_stdict=typedef_stdict, stdict=stdict)
