@@ -63,11 +63,33 @@ def append_comment(str_in, comment_str):
 def format_file(file_path):
     sys_str = platform.system()
     if sys_str == "Windows":
-        os.system('tool\clang-format.exe -i {}'.format(file_path))
+        os.system(fr'common\tool\bin\windows\clang-format.exe -i {file_path}')
     elif sys_str == "Linux":
-        os.system('clang-format -i {}'.format(file_path))
+        os.system(f'clang-format -i {file_path}')
     else:
-        logging.error('unknow system[{}]'.sys_str)
+        logging.error(f'unknow system[{sys_str}]')
+        exit(-1)
+
+
+def ast_dump_all(file_list, encoding='gb18030'):
+    import subprocess
+    sys_str = platform.system()
+    if sys_str == "Windows":
+        file_arg = ' '
+        for file in file_list:
+            file = file.replace('/', '\\')
+            file_arg += f'\"{file}\" '
+        res = subprocess.run(
+            fr'common\tool\bin\windows\clang.exe -cc1 -triple x86_64-unknown-unknown -ast-dump-all=json {file_arg}', stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding)
+        if res.returncode != 0:
+            logging.error(f'cmd[f{res.args}] exec fail[{res.stderr}]')
+
+        return res.stdout
+
+    elif sys_str == "Linux":
+        None
+    else:
+        logging.error(f'unknow system[{sys_str}]')
         exit(-1)
 
 
