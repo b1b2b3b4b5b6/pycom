@@ -1,16 +1,24 @@
+from copy import deepcopy
 import unittest
+
+from deepdiff.serialization import pretty_print_diff
 import common.ast.base as base
 import json
 import common.tool.tool as tool
+import dict_recursive_update
+from deepdiff import DeepDiff
 
 
 class CaseAst(unittest.TestCase):
-    def test_recode_decl(self):
+    def test_records(self):
         json_str = tool.ast_dump_all(
             ['common/tests/llvm-project/clang/test/AST/ast-dump-records.cpp'], encoding='utf-8')
-        fp = open('temp.json', 'w')
-        fp.write(json_str)
-        fp.close()
-        obj = base.parse_json_dict(json.loads(json_str))
-        # obj = base.RecordDecl(json.loads(json_str))
-        # self.assertEqual(obj.inner['b'], 'asf')
+        ori_json_obj = json.loads(json_str)
+        new_json_obj = base.parse_obj(
+            deepcopy(ori_json_obj)).get_restore_dict()
+
+        res = DeepDiff(ori_json_obj, new_json_obj, ignore_order=True)
+        # print(res)
+        # open('temp.json', 'w').write(json_str)
+        # open('_temp.json', 'w').write(json.dumps(new_json_obj, indent=2))
+        self.assertEqual(res, {}, msg=f'diff res: {res}')
