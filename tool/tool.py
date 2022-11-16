@@ -1,8 +1,8 @@
 '''
 @Author: zhanghao.chen
 @Date: 2020-08-01 16:23:15
-LastEditors: Please set LastEditors
-LastEditTime: 2022-02-28 10:44:12
+LastEditors: b1b2b3b4b5b6 a1439458305@163.com
+LastEditTime: 2022-11-16 10:28:51
 @Description: file content
 '''
 import re
@@ -69,6 +69,41 @@ def format_file(file_path):
     else:
         logging.error(f'unknow system[{sys_str}]')
         exit(-1)
+
+
+def dump_memery(file_list, encoding='utf-8'):
+    import subprocess
+    sys_str = platform.system()
+    if sys_str == "Windows":
+        file_arg = ' '
+        for file in file_list:
+            file = file.replace('/', '\\')
+            file_arg += f'\"{file}\" '
+        res = subprocess.run(
+            fr'common\tool\bin\windows\clang.exe -std=c++17 -Xclang -fdump-record-layouts {file_arg}', stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding)
+
+    elif sys_str == "Linux":
+        res = subprocess.run(
+            ['clang', '-std=c++17', '-Xclang', '-fdump-record-layouts', *file_list], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding)
+
+    else:
+        logging.error(f'unknow system[{sys_str}]')
+        exit(-1)
+
+    if res.returncode != 0:
+        logging.error(f'cmd[{res.args}] exec fail[{res.stderr}]')
+
+    return res.stdout
+
+
+def get_mem_by_class(data, class_name):
+    logging.debug(f'try to find {class_name}')
+    g = re.search(
+        rf'(\*\*\* Dumping AST Record Layout\n\s+0 \| class {class_name}.*?\n)\n', data, re.DOTALL)
+    if g is None:
+        logging.error(f'can not find {class_name} mem')
+        return None
+    return g.group(1)
 
 
 def ast_dump_all(file_list, encoding='utf-8'):

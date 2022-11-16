@@ -1,8 +1,8 @@
 '''
 @Author: zhanghao.chen
 @Date: 2020-08-01 09:58:24
-LastEditors: Please set LastEditors
-LastEditTime: 2022-03-03 16:04:02
+LastEditors: b1b2b3b4b5b6 a1439458305@163.com
+LastEditTime: 2022-11-16 13:52:48
 @Description: file content
 '''
 # -*- coding:utf-8 -*-
@@ -20,25 +20,35 @@ logging.basicConfig(level=logging.INFO,
                     format='[%(asctime)s][%(levelname)s]%(filename)s[%(lineno)d]:  %(message)s', datefmt='%d/%b/%Y %H:%M:%S')
 
 # kind start
-TranslationUnitDecl = 'BaseDecl',
-TypedefDecl = 'BaseDecl',
-RecordDecl = 'BaseDecl',
-CXXRecordDecl = 'BaseDecl',
-FieldDecl = 'BaseDecl',
-IndirectFieldDecl = 'BaseDecl',
-ParmVarDecl = 'BaseDecl',
-CXXMethodDecl = 'BaseDecl',
-CXXDestructorDecl = 'BaseDecl',
-ClassTemplateDecl = 'BaseDecl',
-TemplateTypeParmDecl = 'BaseDecl',
+TranslationUnitDecl = 'BaseDecl'
+TypedefDecl = 'BaseDecl'
+RecordDecl = 'BaseDecl'
+CXXRecordDecl = 'BaseDecl'
+FieldDecl = 'BaseDecl'
+IndirectFieldDecl = 'BaseDecl'
+ParmVarDecl = 'BaseDecl'
+CXXMethodDecl = 'BaseDecl'
+CXXDestructorDecl = 'BaseDecl'
+ClassTemplateDecl = 'BaseDecl'
+TemplateTypeParmDecl = 'BaseDecl'
 
-RecordType = 'BaseType',
-ConstantArrayType = 'BaseType',
-PointerType = 'BaseType',
-BuiltinType = 'BaseType',
+RecordType = 'BaseType'
+ConstantArrayType = 'BaseType'
+PointerType = 'BaseType'
+BuiltinType = 'BaseType'
 
-ConstantExpr = 'ToDo',
+ConstantExpr = 'ToDo'
 IntegerLiteral = 'ToDo'
+VarDecl = 'ToDo'
+TypedefType = 'ToDo'
+FunctionDecl = 'ToDo'
+FunctionTemplateDecl = 'ToDo'
+AccessSpecDecl = 'ToDo'
+CompoundStmt = 'ToDo'
+CXXConstructorDecl = 'ToDo'
+CompoundStmt = 'ToDo'
+CompoundStmt = 'ToDo'
+CompoundStmt = 'ToDo'
 # kind end
 
 
@@ -60,7 +70,7 @@ class Base(object):
         for k in obj.__dir__():
             if k.find('__') >= 0:
                 continue
-            v = getattr(self, k)
+            v = getattr(obj, k)
 
             if callable(v):
                 continue
@@ -133,7 +143,7 @@ class Base(object):
             md = importlib.import_module('common.ast.base')
             # class_obj = getattr(md, eval(obj["kind"]))(obj, self)
             class_obj = getattr(
-                md, globals()[obj["kind"]][0])(obj, self)
+                md, globals()[obj["kind"]])(obj, self)
             return class_obj
 
         logging.error(f'unknow obj:\n{obj}\n')
@@ -198,6 +208,17 @@ class ToDo(Base):
 class Loc(Base):
     def __init__(self, json_dict, parent):
         super().__init__(parent)
+
+        class IncludeFrom(Base):
+            def __init__(self, json_dict, parent):
+                super().__init__(parent)
+                if 'file' in json_dict:
+                    self.file = json_dict['file']
+                    json_dict.pop('file')
+                else:
+                    self.file = None
+                self.assert_json_dict_none(json_dict)
+
         if 'file' in json_dict:
             self.file = json_dict['file']
             json_dict.pop('file')
@@ -228,6 +249,12 @@ class Loc(Base):
         else:
             self.tokLen = None
 
+        if 'includedFrom' in json_dict:
+            self.includedFrom = IncludeFrom(json_dict['includedFrom'], self)
+            json_dict.pop('includedFrom')
+        else:
+            self.includedFrom = None
+
         self.assert_json_dict_none(json_dict)
 
 
@@ -235,38 +262,9 @@ class Range(Base):
     def __init__(self, json_dict, parent):
         super().__init__(parent)
 
-        class _Range(Base):
-            def __init__(self, json_dict=''):
-                super().__init__(parent)
-                if 'offset' in json_dict:
-                    self.offset = json_dict['offset']
-                    json_dict.pop('offset')
-                else:
-                    self.offset = None
-
-                if 'line' in json_dict:
-                    self.line = json_dict['line']
-                    json_dict.pop('line')
-                else:
-                    self.line = None
-
-                if 'col' in json_dict:
-                    self.col = json_dict['col']
-                    json_dict.pop('col')
-                else:
-                    self.col = None
-
-                if 'tokLen' in json_dict:
-                    self.tokLen = json_dict['tokLen']
-                    json_dict.pop('tokLen')
-                else:
-                    self.tokLen = None
-
-                self.assert_json_dict_none(json_dict)
-
-        self.begin = _Range(json_dict['begin'])
+        self.begin = Loc(json_dict['begin'], self)
         json_dict.pop('begin')
-        self.end = _Range(json_dict['end'])
+        self.end = Loc(json_dict['end'], self)
         json_dict.pop('end')
 
         self.assert_json_dict_none(json_dict)
@@ -284,6 +282,12 @@ class Type(Base):
             json_dict.pop('desugaredQualType')
         else:
             self.desugaredQualType = None
+
+        if 'typeAliasDeclId' in json_dict:
+            self.typeAliasDeclId = json_dict['typeAliasDeclId']
+            json_dict.pop('typeAliasDeclId')
+        else:
+            self.typeAliasDeclId = None
 
         self.assert_json_dict_none(json_dict)
 
@@ -332,11 +336,11 @@ class BaseType(Base):
 
 
 class BaseDecl(Base):
-    def __init__(self, json_dict, parent):
+    def __init__(self, json_dict={'id': None, 'kind': None}, parent=None):
         super().__init__(parent)
 
         class DefinitionData(Base):
-            def __init__(self, json_dict=''):
+            def __init__(self, json_dict, parent):
                 super().__init__(parent)
                 if 'canConstDefaultInit' in json_dict:
                     self.canConstDefaultInit = json_dict['canConstDefaultInit']
@@ -406,8 +410,15 @@ class BaseDecl(Base):
                 else:
                     self.isEmpty = None
 
+                if 'isPolymorphic' in json_dict:
+                    self.isPolymorphic = json_dict[
+                        'isPolymorphic']
+                    json_dict.pop('isPolymorphic')
+                else:
+                    self.isPolymorphic = None
+
                 class _DefinitionData(Base):
-                    def __init__(self, json_dict):
+                    def __init__(self, json_dict, parent):
                         super().__init__(parent)
                         if 'hasConstParam' in json_dict:
                             self.hasConstParam = json_dict['hasConstParam']
@@ -472,38 +483,42 @@ class BaseDecl(Base):
                         self.assert_json_dict_none(json_dict)
 
                 if 'copyAssign' in json_dict:
-                    self.copyAssign = _DefinitionData(json_dict['copyAssign'])
+                    self.copyAssign = _DefinitionData(
+                        json_dict['copyAssign'], self)
                     json_dict.pop('copyAssign')
                 else:
                     self.copyAssign = None
 
                 if 'copyCtor' in json_dict:
-                    self.copyCtor = _DefinitionData(json_dict['copyCtor'])
+                    self.copyCtor = _DefinitionData(
+                        json_dict['copyCtor'], self)
                     json_dict.pop('copyCtor')
                 else:
                     self.copyCtor = None
 
                 if 'defaultCtor' in json_dict:
                     self.defaultCtor = _DefinitionData(
-                        json_dict['defaultCtor'])
+                        json_dict['defaultCtor'], self)
                     json_dict.pop('defaultCtor')
                 else:
                     self.defaultCtor = None
 
                 if 'dtor' in json_dict:
-                    self.dtor = _DefinitionData(json_dict['dtor'])
+                    self.dtor = _DefinitionData(json_dict['dtor'], self)
                     json_dict.pop('dtor')
                 else:
                     self.dtor = None
 
                 if 'moveAssign' in json_dict:
-                    self.moveAssign = _DefinitionData(json_dict['moveAssign'])
+                    self.moveAssign = _DefinitionData(
+                        json_dict['moveAssign'], self)
                     json_dict.pop('moveAssign')
                 else:
                     self.moveAssign = None
 
                 if 'moveCtor' in json_dict:
-                    self.moveCtor = _DefinitionData(json_dict['moveCtor'])
+                    self.moveCtor = _DefinitionData(
+                        json_dict['moveCtor'], self)
                     json_dict.pop('moveCtor')
                 else:
                     self.moveCtor = None
@@ -613,7 +628,8 @@ class BaseDecl(Base):
             self.index = None
 
         if 'definitionData' in json_dict:
-            self.definitionData = DefinitionData(json_dict['definitionData'])
+            self.definitionData = DefinitionData(
+                json_dict['definitionData'], self)
             json_dict.pop('definitionData')
         else:
             self.definitionData = None
@@ -623,6 +639,30 @@ class BaseDecl(Base):
             json_dict.pop('previousDecl')
         else:
             self.previousDecl = None
+
+        if 'isInvalid' in json_dict:
+            self.isInvalid = json_dict['isInvalid']
+            json_dict.pop('isInvalid')
+        else:
+            self.isInvalid = None
+
+        if 'hasInClassInitializer' in json_dict:
+            self.hasInClassInitializer = json_dict['hasInClassInitializer']
+            json_dict.pop('hasInClassInitializer')
+        else:
+            self.hasInClassInitializer = None
+
+        if 'isUsed' in json_dict:
+            self.isUsed = json_dict['isUsed']
+            json_dict.pop('isUsed')
+        else:
+            self.isUsed = None
+
+        if 'virtual' in json_dict:
+            self.isUsed = json_dict['virtual']
+            json_dict.pop('virtual')
+        else:
+            self.virtual = None
 
         class _Bases(Base):
             def __init__(self, json_dict):
