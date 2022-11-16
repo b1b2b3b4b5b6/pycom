@@ -2,7 +2,7 @@
 @Author: zhanghao.chen
 @Date: 2020-07-29 14:06:25
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-30 14:12:59
+LastEditTime: 2022-02-22 10:43:29
 @Description: file content
 '''
 
@@ -13,7 +13,6 @@ import string
 import shutil
 import logging
 import common.tool.tool as tool
-import common.prasecpp.base as base
 
 # 去行前空白符，行后空白符，行中空白符合并成一个空格
 

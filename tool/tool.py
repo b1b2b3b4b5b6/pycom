@@ -2,7 +2,7 @@
 @Author: zhanghao.chen
 @Date: 2020-08-01 16:23:15
 LastEditors: Please set LastEditors
-LastEditTime: 2022-02-21 13:47:21
+LastEditTime: 2022-02-28 10:44:12
 @Description: file content
 '''
 import re
@@ -71,7 +71,7 @@ def format_file(file_path):
         exit(-1)
 
 
-def ast_dump_all(file_list, encoding='gb18030'):
+def ast_dump_all(file_list, encoding='utf-8'):
     import subprocess
     sys_str = platform.system()
     if sys_str == "Windows":
@@ -81,16 +81,19 @@ def ast_dump_all(file_list, encoding='gb18030'):
             file_arg += f'\"{file}\" '
         res = subprocess.run(
             fr'common\tool\bin\windows\clang.exe -cc1 -triple x86_64-unknown-unknown -ast-dump-all=json {file_arg}', stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding)
-        if res.returncode != 0:
-            logging.error(f'cmd[{res.args}] exec fail[{res.stderr}]')
-
-        return res.stdout
 
     elif sys_str == "Linux":
-        None
+        res = subprocess.run(
+            ['clang', '-cc1', '-triple', 'x86_64-unknown-unknown', '-std=gnu++17', '-ast-dump-all=json', *file_list], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding)
+
     else:
         logging.error(f'unknow system[{sys_str}]')
         exit(-1)
+
+    if res.returncode != 0:
+        logging.error(f'cmd[{res.args}] exec fail[{res.stderr}]')
+
+    return res.stdout
 
 
 def glob_copy(src_rep, dst):
